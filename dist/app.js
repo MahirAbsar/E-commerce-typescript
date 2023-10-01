@@ -7,13 +7,15 @@ require("dotenv/config");
 require("express-async-errors");
 const morgan_1 = __importDefault(require("morgan"));
 const express_1 = __importDefault(require("express"));
+const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const middlewares_1 = require("./middlewares");
 const connect_1 = require("./db/connect");
 const app = (0, express_1.default)();
 // Middlewares
-app.use((0, morgan_1.default)('tiny'));
+app.use((0, morgan_1.default)("tiny"));
 app.use(express_1.default.json());
 // Routes
+app.use("/api/v1/auth", authRoutes_1.default);
 app.get("/", (req, res) => {
     return res.send("<h1>E-Commerce App</h1>");
 });
