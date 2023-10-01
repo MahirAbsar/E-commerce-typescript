@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const validator_1 = __importDefault(require("validator"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const { Schema } = mongoose_1.default;
 const userSchema = new Schema({
     name: {
@@ -32,4 +33,12 @@ const userSchema = new Schema({
         default: 'user'
     }
 });
+userSchema.pre('save', async function () {
+    const genSalt = await bcryptjs_1.default.genSalt(10);
+    this.password = await bcryptjs_1.default.hash(this.password, genSalt);
+});
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    const isMatch = await bcryptjs_1.default.compare(candidatePassword, this.password);
+    return isMatch;
+};
 exports.User = mongoose_1.default.model('User', userSchema);
