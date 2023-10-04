@@ -10,10 +10,12 @@ const express_1 = __importDefault(require("express"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const middlewares_1 = require("./middlewares");
 const connect_1 = require("./db/connect");
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
 // Middlewares
 app.use((0, morgan_1.default)("tiny"));
 app.use(express_1.default.json());
+app.use((0, cookie_parser_1.default)(process.env.JWT_SECRET));
 // Routes
 app.use("/api/v1/auth", authRoutes_1.default);
 app.get("/", (req, res) => {

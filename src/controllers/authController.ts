@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
-import { BadRequestError } from "../errors";
+import { BadRequestError, UnauthorizedError } from "../errors";
 import { StatusCodes } from "http-status-codes";
-import { createToken } from "../utils/jwt";
+import { attachCookiesToResponse } from "../utils/jwt";
 
 export const register = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -14,14 +14,35 @@ export const register = async (req: Request, res: Response) => {
   const role = isFirstUser ? "admin" : "user";
   const user = await User.create({ ...req.body, role });
   const tokenUser = { userId: user._id, name: user.name, role: user.role };
-  const token = createToken(tokenUser);
-  return res.status(StatusCodes.CREATED).json({ user: tokenUser, token });
+  attachCookiesToResponse(res, tokenUser);
+  return res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
 export const login = async (req: Request, res: Response) => {
-  res.send("login user");
+  console.log(req.signedCookies);
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new BadRequestError("Please provide email and password");
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new UnauthorizedError("Invalid credentials");
+  }
+  const isPasswordMatch = await (user as any).comparePassword(password);
+  if (!isPasswordMatch) {
+    throw new UnauthorizedError("Invalid credentials");
+  }
+  const tokenUser = { userId: user._id, name: user.name, role: user.role };
+  attachCookiesToResponse(res, tokenUser);
+  return res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.send("logout user");
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
+  });
+  return res.status(StatusCodes.OK).json({ msg: "Successfully logged out!" });
 };

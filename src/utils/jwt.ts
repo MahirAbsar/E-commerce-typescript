@@ -1,3 +1,4 @@
+import { Response } from "express";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 
@@ -12,6 +13,17 @@ export const createToken = (payload: IPayload) => {
     expiresIn: process.env.JWT_LIFETIME,
   });
   return token;
+};
+
+export const attachCookiesToResponse = (res: Response, payload: IPayload) => {
+  const token = createToken(payload);
+  const oneDay = 1000 * 60 * 60 * 24;
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + oneDay),
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
+  });
 };
 
 export const isTokenValid = (token: string) => {
