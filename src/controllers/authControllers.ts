@@ -3,6 +3,7 @@ import { User } from "../models/User";
 import { BadRequestError, UnauthenticatedError } from "../errors";
 import { StatusCodes } from "http-status-codes";
 import { attachCookiesToResponse } from "../utils/jwt";
+import { createTokenUser } from "../utils/createTokenUser";
 
 export const register = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -13,7 +14,7 @@ export const register = async (req: Request, res: Response) => {
   const isFirstUser = (await User.countDocuments({})) === 0;
   const role = isFirstUser ? "admin" : "user";
   const user = await User.create({ ...req.body, role });
-  const tokenUser = { userId: user._id, name: user.name, role: user.role };
+  const tokenUser = createTokenUser(user);
   attachCookiesToResponse(res, tokenUser);
   return res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
@@ -31,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
   if (!isPasswordMatch) {
     throw new UnauthenticatedError("Invalid credentials");
   }
-  const tokenUser = { userId: user._id, name: user.name, role: user.role };
+  const tokenUser = createTokenUser(user);
   attachCookiesToResponse(res, tokenUser);
   return res.status(StatusCodes.OK).json({ user: tokenUser });
 };

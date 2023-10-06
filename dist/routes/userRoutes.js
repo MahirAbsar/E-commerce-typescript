@@ -12,7 +12,7 @@ router
     .get(middlewares_1.authenticationMiddleware, (0, middlewares_1.authorizePermissions)("admin", "owner"), userControllers_1.getAllUsers);
 router.route("/showMe").get(middlewares_1.authenticationMiddleware, userControllers_1.showCurrentUser);
 router.route("/updateUser").patch(userControllers_1.updateUser);
-router.route("/updateUserPassword").patch(userControllers_1.updateUserPassword);
+router.route("/updateUserPassword").patch(middlewares_1.authenticationMiddleware, userControllers_1.updateUserPassword);
 router
     .route("/:id")
     .get(middlewares_1.authenticationMiddleware, (0, middlewares_1.authorizePermissions)("admin", "user"), userControllers_1.getSingleUser);

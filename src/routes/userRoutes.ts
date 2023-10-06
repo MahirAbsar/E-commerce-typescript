@@ -20,7 +20,7 @@ router
   );
 router.route("/showMe").get(authenticationMiddleware, showCurrentUser);
 router.route("/updateUser").patch(updateUser);
-router.route("/updateUserPassword").patch(updateUserPassword);
+router.route("/updateUserPassword").patch(authenticationMiddleware, updateUserPassword);
 router
   .route("/:id")
   .get(
