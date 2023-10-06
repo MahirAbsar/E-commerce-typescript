@@ -20,18 +20,17 @@ const register = async (req, res) => {
 };
 exports.register = register;
 const login = async (req, res) => {
-    console.log(req.signedCookies);
     const { email, password } = req.body;
     if (!email || !password) {
         throw new errors_1.BadRequestError("Please provide email and password");
     }
     const user = await User_1.User.findOne({ email });
     if (!user) {
-        throw new errors_1.UnauthorizedError("Invalid credentials");
+        throw new errors_1.UnauthenticatedError("Invalid credentials");
     }
     const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
-        throw new errors_1.UnauthorizedError("Invalid credentials");
+        throw new errors_1.UnauthenticatedError("Invalid credentials");
     }
     const tokenUser = { userId: user._id, name: user.name, role: user.role };
     (0, jwt_1.attachCookiesToResponse)(res, tokenUser);

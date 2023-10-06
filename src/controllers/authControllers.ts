@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
-import { BadRequestError, UnauthorizedError } from "../errors";
+import { BadRequestError, UnauthenticatedError } from "../errors";
 import { StatusCodes } from "http-status-codes";
 import { attachCookiesToResponse } from "../utils/jwt";
 
@@ -19,18 +19,17 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  console.log(req.signedCookies);
   const { email, password } = req.body;
   if (!email || !password) {
     throw new BadRequestError("Please provide email and password");
   }
   const user = await User.findOne({ email });
   if (!user) {
-    throw new UnauthorizedError("Invalid credentials");
+    throw new UnauthenticatedError("Invalid credentials");
   }
   const isPasswordMatch = await (user as any).comparePassword(password);
   if (!isPasswordMatch) {
-    throw new UnauthorizedError("Invalid credentials");
+    throw new UnauthenticatedError("Invalid credentials");
   }
   const tokenUser = { userId: user._id, name: user.name, role: user.role };
   attachCookiesToResponse(res, tokenUser);

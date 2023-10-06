@@ -16,5 +16,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./custom-api"), exports);
 __exportStar(require("./bad-request"), exports);
-__exportStar(require("./unauthorized"), exports);
+__exportStar(require("./unauthenticated"), exports);
 __exportStar(require("./not-found"), exports);
+__exportStar(require("./unauthorized"), exports);

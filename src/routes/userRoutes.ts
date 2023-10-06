@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { authenticationMiddleware, authorizePermissions } from "../middlewares";
 
 import {
   getAllUsers,
@@ -10,10 +11,22 @@ import {
 
 const router = express.Router();
 
-router.route("/").get(getAllUsers);
+router
+  .route("/")
+  .get(
+    authenticationMiddleware,
+    authorizePermissions("admin", "owner"),
+    getAllUsers
+  );
 router.route("/showMe").get(showCurrentUser);
 router.route("/updateUser").patch(updateUser);
 router.route("/updateUserPassword").patch(updateUserPassword);
-router.route("/:id").get(getSingleUser);
+router
+  .route("/:id")
+  .get(
+    authenticationMiddleware,
+    authorizePermissions("admin", "user"),
+    getSingleUser
+  );
 
 export default router;
