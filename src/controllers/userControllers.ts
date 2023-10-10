@@ -6,6 +6,9 @@ import {
   UnauthenticatedError,
 } from "../errors";
 import { StatusCodes } from "http-status-codes";
+import { createTokenUser } from "../utils/createTokenUser";
+import { attachCookiesToResponse } from "../utils/jwt";
+import { checkPermissions } from "../utils/checkPermission";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   const users = await User.find({ role: "user" }).select("-password");
@@ -17,6 +20,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
   if (!user) {
     throw new NotFoundError(`No user found with id: ${req.params.id}`);
   }
+  checkPermissions(req.user, user._id);
   return res.status(StatusCodes.OK).json({ user });
 };
 
@@ -25,7 +29,21 @@ export const showCurrentUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  return res.send("Update user");
+  const { email, name } = req.body;
+
+  if (!email || !name) {
+    throw new BadRequestError("Please provide name and emaul");
+  }
+
+  const user = await User.findOneAndUpdate(
+    { _id: req.user.userId },
+    { name, email },
+    { new: true, runValidators: true }
+  );
+
+  const tokenUser = createTokenUser(user!);
+  attachCookiesToResponse(res, tokenUser);
+  return res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
 export const updateUserPassword = async (req: Request, res: Response) => {

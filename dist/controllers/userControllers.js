@@ -4,6 +4,9 @@ exports.updateUserPassword = exports.updateUser = exports.showCurrentUser = expo
 const User_1 = require("../models/User");
 const errors_1 = require("../errors");
 const http_status_codes_1 = require("http-status-codes");
+const createTokenUser_1 = require("../utils/createTokenUser");
+const jwt_1 = require("../utils/jwt");
+const checkPermission_1 = require("../utils/checkPermission");
 const getAllUsers = async (req, res) => {
     const users = await User_1.User.find({ role: "user" }).select("-password");
     return res.status(http_status_codes_1.StatusCodes.OK).json({ users });
@@ -14,6 +17,7 @@ const getSingleUser = async (req, res) => {
     if (!user) {
         throw new errors_1.NotFoundError(`No user found with id: ${req.params.id}`);
     }
+    (0, checkPermission_1.checkPermissions)(req.user, user._id);
     return res.status(http_status_codes_1.StatusCodes.OK).json({ user });
 };
 exports.getSingleUser = getSingleUser;
@@ -22,7 +26,14 @@ const showCurrentUser = async (req, res) => {
 };
 exports.showCurrentUser = showCurrentUser;
 const updateUser = async (req, res) => {
-    return res.send("Update user");
+    const { email, name } = req.body;
+    if (!email || !name) {
+        throw new errors_1.BadRequestError("Please provide name and emaul");
+    }
+    const user = await User_1.User.findOneAndUpdate({ _id: req.user.userId }, { name, email }, { new: true, runValidators: true });
+    const tokenUser = (0, createTokenUser_1.createTokenUser)(user);
+    (0, jwt_1.attachCookiesToResponse)(res, tokenUser);
+    return res.status(http_status_codes_1.StatusCodes.OK).json({ user: tokenUser });
 };
 exports.updateUser = updateUser;
 const updateUserPassword = async (req, res) => {

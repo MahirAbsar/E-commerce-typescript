@@ -5,6 +5,7 @@ const User_1 = require("../models/User");
 const errors_1 = require("../errors");
 const http_status_codes_1 = require("http-status-codes");
 const jwt_1 = require("../utils/jwt");
+const createTokenUser_1 = require("../utils/createTokenUser");
 const register = async (req, res) => {
     const { email } = req.body;
     const emailAlreadyExists = await User_1.User.findOne({ email });
@@ -14,7 +15,7 @@ const register = async (req, res) => {
     const isFirstUser = (await User_1.User.countDocuments({})) === 0;
     const role = isFirstUser ? "admin" : "user";
     const user = await User_1.User.create({ ...req.body, role });
-    const tokenUser = { userId: user._id, name: user.name, role: user.role };
+    const tokenUser = (0, createTokenUser_1.createTokenUser)(user);
     (0, jwt_1.attachCookiesToResponse)(res, tokenUser);
     return res.status(http_status_codes_1.StatusCodes.CREATED).json({ user: tokenUser });
 };
@@ -32,7 +33,7 @@ const login = async (req, res) => {
     if (!isPasswordMatch) {
         throw new errors_1.UnauthenticatedError("Invalid credentials");
     }
-    const tokenUser = { userId: user._id, name: user.name, role: user.role };
+    const tokenUser = (0, createTokenUser_1.createTokenUser)(user);
     (0, jwt_1.attachCookiesToResponse)(res, tokenUser);
     return res.status(http_status_codes_1.StatusCodes.OK).json({ user: tokenUser });
 };
