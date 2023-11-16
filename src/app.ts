@@ -8,6 +8,7 @@ import productRouter from "./routes/productRoutes";
 import { notFoundMiddleware, errorHandlerMiddleware } from "./middlewares";
 import { connectDB } from "./db/connect";
 import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
 
 const app: Express = express();
 
@@ -15,6 +16,8 @@ const app: Express = express();
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(express.static("./public"));
+app.use(fileUpload());
 // Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
