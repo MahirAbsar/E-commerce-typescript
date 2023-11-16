@@ -5,6 +5,7 @@ import express, { Express, Request, Response } from "express";
 import authRouter from "./routes/authRoutes";
 import userRouter from "./routes/userRoutes";
 import productRouter from "./routes/productRoutes";
+import reviewRouter from "./routes/reviewRoutes";
 import { notFoundMiddleware, errorHandlerMiddleware } from "./middlewares";
 import { connectDB } from "./db/connect";
 import cookieParser from "cookie-parser";
@@ -22,6 +23,7 @@ app.use(fileUpload());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/reviews", reviewRouter);
 app.get("/", (req: Request, res: Response) => {
   return res.send("<h1>E-Commerce App</h1>");
 });
