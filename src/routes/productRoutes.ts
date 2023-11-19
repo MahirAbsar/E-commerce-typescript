@@ -11,6 +11,7 @@ import {
   deleteProduct,
   uploadImage,
 } from "../controllers/productControllers";
+import { getSingleProductReviews } from "../controllers/reviewControllers";
 
 router
   .route("/")
@@ -35,5 +36,7 @@ router
     [authenticationMiddleware, authorizePermissions("admin")],
     deleteProduct
   );
+
+router.get("/:id/reviews", getSingleProductReviews);
 
 export default router;

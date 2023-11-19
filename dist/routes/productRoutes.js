@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const middlewares_1 = require("../middlewares");
 const router = express_1.default.Router();
 const productControllers_1 = require("../controllers/productControllers");
+const reviewControllers_1 = require("../controllers/reviewControllers");
 router
     .route("/")
     .post([middlewares_1.authenticationMiddleware, (0, middlewares_1.authorizePermissions)("admin")], productControllers_1.createProduct)
@@ -19,4 +20,5 @@ router
     .get(productControllers_1.getSingleProduct)
     .patch([middlewares_1.authenticationMiddleware, (0, middlewares_1.authorizePermissions)("admin")], productControllers_1.updateProduct)
     .delete([middlewares_1.authenticationMiddleware, (0, middlewares_1.authorizePermissions)("admin")], productControllers_1.deleteProduct);
+router.get("/:id/reviews", reviewControllers_1.getSingleProductReviews);
 exports.default = router;

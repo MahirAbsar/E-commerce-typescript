@@ -6,7 +6,10 @@ import { BadRequestError, NotFoundError } from "../errors";
 import { checkPermissions } from "../utils/checkPermission";
 
 export const getAllReviews = async (req: Request, res: Response) => {
-  const reviews = await Review.find({});
+  const reviews = await Review.find({}).populate({
+    path: "product",
+    select: "name price company",
+  });
   return res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
 };
 
@@ -80,4 +83,18 @@ export const deleteReview = async (req: Request, res: Response) => {
   await review.deleteOne();
 
   return res.status(StatusCodes.OK).json({ msg: "Success! Review Deleted" });
+};
+
+export const getSingleProductReviews = async (req: Request, res: Response) => {
+  const { id: productId } = req.params;
+
+  const product = await Product.findOne({ _id: productId });
+
+  if (!product) {
+    throw new NotFoundError(`No product found with id ${productId}`);
+  }
+
+  const reviews = await Review.find({ product: productId });
+
+  return res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
 };

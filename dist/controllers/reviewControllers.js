@@ -1,13 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteReview = exports.updateReview = exports.createReview = exports.getSingleReview = exports.getAllReviews = void 0;
+exports.getSingleProductReviews = exports.deleteReview = exports.updateReview = exports.createReview = exports.getSingleReview = exports.getAllReviews = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const Review_1 = require("../models/Review");
 const Product_1 = require("../models/Product");
 const errors_1 = require("../errors");
 const checkPermission_1 = require("../utils/checkPermission");
 const getAllReviews = async (req, res) => {
-    const reviews = await Review_1.Review.find({});
+    const reviews = await Review_1.Review.find({}).populate({
+        path: "product",
+        select: "name price company",
+    });
     return res.status(http_status_codes_1.StatusCodes.OK).json({ reviews, count: reviews.length });
 };
 exports.getAllReviews = getAllReviews;
@@ -64,3 +67,13 @@ const deleteReview = async (req, res) => {
     return res.status(http_status_codes_1.StatusCodes.OK).json({ msg: "Success! Review Deleted" });
 };
 exports.deleteReview = deleteReview;
+const getSingleProductReviews = async (req, res) => {
+    const { id: productId } = req.params;
+    const product = await Product_1.Product.findOne({ _id: productId });
+    if (!product) {
+        throw new errors_1.NotFoundError(`No product found with id ${productId}`);
+    }
+    const reviews = await Review_1.Review.find({ product: productId });
+    return res.status(http_status_codes_1.StatusCodes.OK).json({ reviews, count: reviews.length });
+};
+exports.getSingleProductReviews = getSingleProductReviews;
