@@ -10,6 +10,7 @@ const express_1 = __importDefault(require("express"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
+const orderRoutes_1 = __importDefault(require("./routes/orderRoutes"));
 const reviewRoutes_1 = __importDefault(require("./routes/reviewRoutes"));
 const middlewares_1 = require("./middlewares");
 const connect_1 = require("./db/connect");
@@ -27,6 +28,7 @@ app.use("/api/v1/auth", authRoutes_1.default);
 app.use("/api/v1/users", userRoutes_1.default);
 app.use("/api/v1/products", productRoutes_1.default);
 app.use("/api/v1/reviews", reviewRoutes_1.default);
+app.use("/api/v1/orders", orderRoutes_1.default);
 app.get("/", (req, res) => {
     return res.send("<h1>E-Commerce App</h1>");
 });
