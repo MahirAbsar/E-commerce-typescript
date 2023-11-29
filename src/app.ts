@@ -11,9 +11,27 @@ import { notFoundMiddleware, errorHandlerMiddleware } from "./middlewares";
 import { connectDB } from "./db/connect";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import { rateLimit } from "express-rate-limit";
+import { xss } from "express-xss-sanitizer";
+import helmet from "helmet";
+import cors from "cors";
+import mongoSanitize from "express-mongo-sanitize";
 
 const app: Express = express();
 
+// security stuffs
+app.set("trust proxy", 1);
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+app.use(limiter);
+app.use(helmet());
+app.use(xss());
+app.use(cors());
+app.use(mongoSanitize());
 // Middlewares
 app.use(morgan("tiny"));
 app.use(express.json());

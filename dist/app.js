@@ -16,7 +16,25 @@ const middlewares_1 = require("./middlewares");
 const connect_1 = require("./db/connect");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
+const express_rate_limit_1 = require("express-rate-limit");
+const express_xss_sanitizer_1 = require("express-xss-sanitizer");
+const helmet_1 = __importDefault(require("helmet"));
+const cors_1 = __importDefault(require("cors"));
+const express_mongo_sanitize_1 = __importDefault(require("express-mongo-sanitize"));
 const app = (0, express_1.default)();
+// security stuffs
+app.set("trust proxy", 1);
+const limiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+});
+app.use(limiter);
+app.use((0, helmet_1.default)());
+app.use((0, express_xss_sanitizer_1.xss)());
+app.use((0, cors_1.default)());
+app.use((0, express_mongo_sanitize_1.default)());
 // Middlewares
 app.use((0, morgan_1.default)("tiny"));
 app.use(express_1.default.json());
