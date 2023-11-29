@@ -4,6 +4,7 @@ import { Product } from "../models/Product";
 import mongoose from "mongoose";
 import { Order } from "../models/Order";
 import { StatusCodes } from "http-status-codes";
+import { checkPermissions } from "../utils/checkPermission";
 
 interface IOrderItem {
   name: string;
@@ -74,17 +75,35 @@ export const createOrder = async (req: Request, res: Response) => {
 };
 
 export const getAllOrders = async (req: Request, res: Response) => {
-  return res.status(200).send("get all orders");
+  const orders = await Order.find({});
+  return res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
 export const getSingleOrder = async (req: Request, res: Response) => {
-  return res.status(200).send("get single order");
+  const { id: orderId } = req.params;
+  const order = await Order.findOne({ _id: orderId });
+  if (!order) {
+    throw new NotFoundError(`No order found with id: ${orderId}`);
+  }
+  checkPermissions(req.user, order.user);
+  return res.status(StatusCodes.OK).json({ order });
 };
 
 export const getCurrentUserOrders = async (req: Request, res: Response) => {
-  return res.status(200).send("get current user orders");
+  const orders = await Order.find({ user: req.user.userId });
+  return res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
 export const updateOrder = async (req: Request, res: Response) => {
-  return res.status(200).send("update order");
+  const { id: orderId } = req.params;
+  const { paymentIntentId } = req.body;
+  const order = await Order.findOne({ _id: orderId });
+  if (!order) {
+    throw new NotFoundError(`No order found with id: ${orderId}`);
+  }
+  checkPermissions(req.user, order.user);
+  order.paymentIntentId = paymentIntentId;
+  order.status = "paid";
+  await order.save();
+  return res.status(StatusCodes.OK).json({ order });
 };
